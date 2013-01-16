@@ -110,6 +110,8 @@ modedIPart = ['And' [['Many' :part]]]     -> ["*", part, None]
 
 expr = expr5(True):e (token('|') expr5(True))+:es !(es.insert(0, e))
           -> self.builder._or(es)
+      | expr5(True):e (token('||') expr5(True))+:es !(es.insert(0, e))
+          -> self.builder._xor(es)
       | expr5(False)
 
 ruleValue = token("->") -> self.ruleValueExpr()
