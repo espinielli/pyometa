@@ -157,6 +157,7 @@ opt = ( ['Apply' :ruleName :codeName [anything*:exprs]] -> self.builder.apply(ru
       | ['List' opt:exprs]      -> self.builder.listpattern(exprs)
       | ['ConsumedBy' opt:expr] -> self.builder.consumedby(expr)
       | ['Range' :c1 :c2]       -> self.builder.range(c1, c2)
+      | ['Interleave' opt:exprs] -> self.builder.interleave(exprs)
       )
 grammar = ['Grammar' :name [rulePair*:rs]] -> self.builder.makeGrammar(rs)
 rulePair = ['Rule' :name opt:rule] -> self.builder.rule(name, rule)
