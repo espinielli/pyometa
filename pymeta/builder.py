@@ -317,7 +317,6 @@ class PythonWriter(object):
         """
         if len(exprs) > 1:
             args = []
-            print 'exprs', exprs
             for x, expr, name in exprs:
                 args.append(repr(x))
                 args.append(self._newThunkFor("interleave", expr))
