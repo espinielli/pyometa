@@ -67,6 +67,9 @@ class TreeBuilder(object):
     def range(self, c1, c2):
         return ["Range", c1, c2]
 
+    def interleave(self, exprs):
+        return ["Interleave", exprs]
+
 class PythonWriter(object):
     """
     Converts an OMeta syntax tree into Python source.
@@ -306,6 +309,17 @@ class PythonWriter(object):
         Create a call to self.range(c1, c2)
         """
         return self._expr('range', 'self.range(%r, %r)' % (c1, c2))
+
+    def generate_Interleave(self, exprs):
+        """
+        Create a call to
+        self._interleave([lambda: expr1, lambda: expr2, ... , lambda: exprN]).
+        """
+        if len(exprs) > 1:
+            fnames = [self._newThunkFor("interleave", expr) for expr in exprs]
+            return self._expr('interleave', 'self._interleave([%s])' % (', '.join(fnames)))
+        else:
+            return self._generateNode(exprs[0])
 
 class BootWriter(PythonWriter):
     def generate_Grammar(self, name, rules):

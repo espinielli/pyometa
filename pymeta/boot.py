@@ -644,16 +644,40 @@ class BootOMetaGrammar(GrammarBase):
     def rule_expr4(self):
         _locals = {'self': self}
         self.locals['expr4'] = _locals
-        def _G_many_1():
+        def _G_or_1():
             _G_apply_1, lastError = self._apply(self.rule_expr3, "expr3", [])
             self.considerError(lastError)
-            return (_G_apply_1, self.currentError)
-        _G_many_2, lastError = self.many(_G_many_1)
+            _locals['e'] = _G_apply_1
+            def _G_many1_2():
+                _G_python_1, lastError = eval('"&&"', self.globals, _locals), None
+                self.considerError(lastError)
+                _G_apply_2, lastError = self._apply(self.rule_token, "token", [_G_python_1])
+                self.considerError(lastError)
+                _G_apply_3, lastError = self._apply(self.rule_expr3, "expr3", [])
+                self.considerError(lastError)
+                return (_G_apply_3, self.currentError)
+            _G_many1_3, lastError = self.many(_G_many1_2, _G_many1_2())
+            self.considerError(lastError)
+            _locals['es'] = _G_many1_3
+            _G_python_4, lastError = eval('es.insert(0, e)', self.globals, _locals), None
+            self.considerError(lastError)
+            _G_python_5, lastError = eval('self.builder.interleave(es)', self.globals, _locals), None
+            self.considerError(lastError)
+            return (_G_python_5, self.currentError)
+        def _G_or_2():
+            def _G_many_1():
+                _G_apply_1, lastError = self._apply(self.rule_expr3, "expr3", [])
+                self.considerError(lastError)
+                return (_G_apply_1, self.currentError)
+            _G_many_2, lastError = self.many(_G_many_1)
+            self.considerError(lastError)
+            _locals['es'] = _G_many_2
+            _G_python_3, lastError = eval('self.builder.sequence(es)', self.globals, _locals), None
+            self.considerError(lastError)
+            return (_G_python_3, self.currentError)
+        _G_or_3, lastError = self._or([_G_or_1, _G_or_2])
         self.considerError(lastError)
-        _locals['es'] = _G_many_2
-        _G_python_3, lastError = eval('self.builder.sequence(es)', self.globals, _locals), None
-        self.considerError(lastError)
-        return (_G_python_3, self.currentError)
+        return (_G_or_3, self.currentError)
 
 
     def rule_expr(self):

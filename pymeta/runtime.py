@@ -614,6 +614,35 @@ class OMetaBase(object):
             e[1] = expected('range between %r and %r' % (c1, c2))
             raise _MaybeParseError(*e)
 
+    def _interleave(self, fns):
+        """
+        Call each of a list of functions in sequence until all succeed at least
+        ontime, rewinding the input between each.
+
+        @param fns: A list of no-argument callables.
+        """
+        result = []
+        errors1 = []
+        errors2 = []
+        while True:
+            for f in fns:
+                try:
+                    m = self.input
+                    ret, err = f()
+                    fns.remove(f)
+                    result.append(ret)
+                    errors1.append(err)
+                    break
+                except _MaybeParseError, e:
+                    self.input = m
+                    errors2.append(e)
+                    continue
+            else:
+                if fns:
+                    raise _MaybeParseError(*joinErrors(errors2))
+                else:
+                    return result, joinErrors(errors1)
+
     def pythonExpr(self, endChars="\r\n"):
         """
         Extract a Python expression from the input and return it.

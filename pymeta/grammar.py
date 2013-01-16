@@ -92,7 +92,9 @@ expr3 = (expr2:e ('*' -> self.builder.many(e)
           |token(':') name:n
            -> self.builder.bind(self.builder.apply("anything", self.name), n)
 
-expr4 = expr3*:es -> self.builder.sequence(es)
+expr4 = expr3:e (token("&&") expr3)+:es !(es.insert(0, e))
+          -> self.builder.interleave(es)
+     | expr3*:es -> self.builder.sequence(es)
 
 expr = expr4:e (token('|') expr4)*:es !(es.insert(0, e))
           -> self.builder._or(es)
