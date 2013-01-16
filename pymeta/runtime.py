@@ -617,34 +617,53 @@ class OMetaBase(object):
             e[1] = expected('range between %r and %r' % (c1, c2))
             raise _MaybeParseError(*e)
 
-    def _interleave(self, fns):
+    def _interleave(self, _locals, *args):
         """
         Call each of a list of functions in sequence until all succeed at least
         ontime, rewinding the input between each.
 
         @param fns: A list of no-argument callables.
         """
-        result = []
-        errors1 = []
-        errors2 = []
+        args = list(args)
+        currInput = self.input
+        errors = []
+        ans = [None]*(len(args)/3)
+        for idx in range(0, len(args), 3):
+            mod, fun, name = args[idx:idx+3]
+            ans[idx/3] = [] if mod in ('*', '+') else None
         while True:
-            for f in fns:
-                try:
-                    m = self.input
-                    ret, err = f()
-                    fns.remove(f)
-                    result.append(ret)
-                    errors1.append(err)
-                    break
-                except _MaybeParseError, e:
-                    self.input = m
-                    errors2.append(e)
-                    continue
+            idx = 0
+            all_done = True
+            for idx in range(0, len(args), 3):
+                mod, fun, name = args[idx:idx+3]
+                if args[idx] != '0':
+                    try:
+                        self.input = currInput
+                        v, e = fun()
+                        if args[idx] == '*':
+                            ans[idx/3].append(v)
+                        elif args[idx] == '+':
+                            ans[idx/3].append(v)
+                            args[idx] = '*'
+                        elif args[idx] in ('?','1'):
+                            ans[idx/3] = v
+                            args[idx] = '0'
+                        else:
+                            raise ValueError('invalid mode in OMeta._interleave')
+                        errors.append(e)
+                        currInput = self.input
+                        break
+                    except _MaybeParseError, e:
+                        all_done = all_done and args[idx] in ('*', '?')
             else:
-                if fns:
-                    raise _MaybeParseError(*joinErrors(errors2))
+                if all_done:
+                    for idx in range(0, len(args), 3):
+                        mod, fun, name = args[idx:idx+3]
+                        if name:
+                            _locals[name] = ans[idx/3]
+                    return ans, joinErrors(errors)
                 else:
-                    return result, joinErrors(errors1)
+                    raise _MaybeParseError(*joinErrors(errors))
 
     def pythonExpr(self, endChars="\r\n"):
         """

@@ -316,8 +316,13 @@ class PythonWriter(object):
         self._interleave([lambda: expr1, lambda: expr2, ... , lambda: exprN]).
         """
         if len(exprs) > 1:
-            fnames = [self._newThunkFor("interleave", expr) for expr in exprs]
-            return self._expr('interleave', 'self._interleave([%s])' % (', '.join(fnames)))
+            args = []
+            print 'exprs', exprs
+            for x, expr, name in exprs:
+                args.append(repr(x))
+                args.append(self._newThunkFor("interleave", expr))
+                args.append(repr(name))
+            return self._expr('interleave', 'self._interleave(_locals, %s)' % (', '.join(args)))
         else:
             return self._generateNode(exprs[0])
 

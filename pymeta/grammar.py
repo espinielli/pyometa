@@ -92,12 +92,25 @@ expr3 = (expr2:e ('*' -> self.builder.many(e)
           |token(':') name:n
            -> self.builder.bind(self.builder.apply("anything", self.name), n)
 
-expr4 = expr3:e (token("&&") expr3)+:es !(es.insert(0, e))
-          -> self.builder.interleave(es)
-     | expr3*:es -> self.builder.sequence(es)
+expr4 :ne = ?(ne) expr3+:es -> self.builder.sequence(es)
+          | ?(not ne) expr3*:es -> self.builder.sequence(es)
 
-expr = expr4:e (token('|') expr4)*:es !(es.insert(0, e))
+expr5 :ne = interleavePart:e (token("&&") interleavePart)+:es !(es.insert(0, e))
+          -> self.builder.interleave(es)
+        | expr4(ne)
+
+interleavePart = token("(") expr4(True):e token(")") -> ["1", e]
+ | expr4(True):part modedIPart(part):x -> x
+
+modedIPart = ['And' [['Many' :part]]]     -> ["*", part, None]
+           | ['And' [['Many1' :part]]]    -> ["+", part, None]
+           | ['And' [['Optional' :part]]] -> ["?", part, None]
+           | ['And' [['Bind' :name :part1]]]:e modedIPart(part1):part2 -> part2[:2] + [name]
+           | :part                      -> ["1", part, None]
+
+expr = expr5(True):e (token('|') expr5(True))+:es !(es.insert(0, e))
           -> self.builder._or(es)
+      | expr5(False)
 
 ruleValue = token("->") -> self.ruleValueExpr()
 
@@ -107,7 +120,7 @@ semanticAction = token("!(") -> self.semanticActionExpr()
 
 rulePart :requiredName = noindentation name:n ?(n == requiredName)
                             !(setattr(self, "name", n))
-                            expr4:args
+                            expr5(False):args
                             (token("=") expr:e
                                -> self.builder.sequence([args, e])
                             |  -> args)
