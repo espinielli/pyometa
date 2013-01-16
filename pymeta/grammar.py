@@ -103,10 +103,11 @@ expr5 :ne = interleavePart:e (token("&&") interleavePart)+:es !(es.insert(0, e))
 interleavePart = token("(") expr4(True):e token(")") -> ["1", e]
  | expr4(True):part modedIPart(part):x -> x
 
-modedIPart = ['And' [['Many' :part]]]     -> ["*", part, None]
-           | ['And' [['Many1' :part]]]    -> ["+", part, None]
-           | ['And' [['Optional' :part]]] -> ["?", part, None]
-           | ['And' [['Bind' :name :part1]]]:e modedIPart(part1):part2 -> part2[:2] + [name]
+modedIPart = ['Many' :part]     -> ["*", part, None]
+           | ['Many1' :part]    -> ["+", part, None]
+           | ['Optional' :part] -> ["?", part, None]
+           | ['Bind' :name :part]:e modedIPart(part):newpart -> newpart[:2] + [name]
+           | ['And' :part] modedIPart(part):newpart -> newpart
            | :part                      -> ["1", part, None]
 
 expr = expr5(True):e (token('|') expr5(True))+:es !(es.insert(0, e))
