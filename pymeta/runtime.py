@@ -696,6 +696,7 @@ class OMetaBase(object):
                         currInput = self.input
                         break
                     except _MaybeParseError, e:
+                        self.input = currInput
                         all_done = all_done and args[idx] in ('*', '?')
             else:
                 if all_done:
