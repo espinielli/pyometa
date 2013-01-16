@@ -67,7 +67,7 @@ class TreeBuilder(object):
     def consumedby(self, exprs):
         return ["ConsumedBy", exprs]
 
-    def consumedby(self, exprs):
+    def index_consumedby(self, exprs):
         return ["IndexConsumedBy", exprs]
 
     def range(self, c1, c2):

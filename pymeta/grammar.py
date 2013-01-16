@@ -78,7 +78,7 @@ expr1 = application
           |token('(') expr:e token(')') -> e
           |token('[') expr:e token(']') -> self.builder.listpattern(e)
           |token('<') expr:e token('>') -> self.builder.consumedby(e)
-          |token("@<") expr:e token('>') -> self.builder.index_consumedby(e)
+          |token('@<') expr:e token('>') -> self.builder.index_consumedby(e)
 
 expr2 = token('~') (token('~') expr2:e -> self.builder.lookahead(e)
                        |expr2:e -> self.builder._not(e))
