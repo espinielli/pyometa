@@ -1,19 +1,25 @@
-from setuptools import setup, find_packages
+from distutils.core import setup
 
-DESCRIPTION = 'Parser generator'
+DESCRIPTION = 'Pattern-matching language based on OMeta'
 
 LONG_DESCRIPTION = None
+LICENSE = None
 try:
-    LONG_DESCRIPTION = open('README.rst').read()
+    LONG_DESCRIPTION = open('README.md').read()
+    LICENSE = open('LICENSE').read()
 except:
     pass
 
-setup(name='pymeta2',
-      packages=find_packages(exclude=('tests', 'tests.*')),
-      author='Waldemar Kornewald',
-      url='http://www.allbuttonspressed.com/projects/pymeta2',
-      description=DESCRIPTION,
-      long_description=LONG_DESCRIPTION,
-      platforms=['any'],
-      install_requires=[],
+setup(name='pyometa',
+	version="1.0.0",
+	packages=['pyometa'],
+	author='Enrico Spinielli',
+	author_email='enrico.spinielli@gmail.com',
+	maintainer='Enrico Spinielli',
+	maintainer_email='enrico.spinielli@gmail.com',
+	url='https://github.com/espinielli/pyometa',
+	description=DESCRIPTION,
+	long_description=LONG_DESCRIPTION,
+	platforms=['any'],
+	license=LICENSE
 )
