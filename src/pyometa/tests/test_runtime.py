@@ -1,9 +1,9 @@
-from pymeta.runtime import OMetaBase, _MaybeParseError, expected
+from pyometa.runtime import OMetaBase, _MaybeParseError, expected
 import unittest
 
 class RuntimeTests(unittest.TestCase):
     """
-    Tests for L{pymeta.runtime}.
+    Tests for L{pyometa.runtime}.
     """
 
     def test_anything(self):
