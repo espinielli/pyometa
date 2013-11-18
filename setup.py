@@ -10,9 +10,11 @@ try:
 except:
     pass
 
-setup(name='pyometa',
+setup(
+	name='pyometa',
 	version="1.0.0",
 	packages=['pyometa'],
+	package_dir={'pyometa':'src/pyometa'},
 	author='Enrico Spinielli',
 	author_email='enrico.spinielli@gmail.com',
 	maintainer='Enrico Spinielli',
