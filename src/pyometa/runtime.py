@@ -265,9 +265,6 @@ class OMetaBase(object):
 
         self.currentError = self.input.nullError()
 
-    def debug(self, *args):
-        print args
-
     @classmethod
     def parse(cls, source):
         if isinstance(source, str):
@@ -425,39 +422,6 @@ class OMetaBase(object):
                 errors.append(e)
                 self.input = m
         raise _MaybeParseError(*joinErrors(errors))
-
-    def _xor(self, fns):
-        """
-        Call each of a list of functions in sequence until one succeeds,
-        then continue to verify no other succeed.
-
-        @param fns: A list of no-argument callables.
-        """
-        errors = []
-        ok = False
-        m = self.input
-        import pdb
-        pdb.set_trace()
-        for f in fns:
-            try:
-                self.input = m
-                ret, err = f()
-            except _MaybeParseError, e:
-                errors.append(e)
-            else:
-                errors.append(err)
-                if ok:
-                    self.input = m
-                    raise _MaybeParseError(m.position, [('message', 'xor rule matched %s and %s' % (result, ret))])
-                result = ret
-                result_input = self.input
-                ok = True
-        if not ok:
-            self.input = m
-            raise _MaybeParseError(*joinErrors(errors))
-        else:
-            self.input = result_input
-            return result, joinErrors(errors)
 
 
     def _not(self, fn):
@@ -631,7 +595,7 @@ class OMetaBase(object):
 
     def consumed_by(self, f):
         """
-            Try to parse f, if successful return the full string matching it
+        Try to parse f, if successful return the full string matching it
         """
         m = self.input
         r = f()
@@ -639,74 +603,6 @@ class OMetaBase(object):
         if m.basetype in (str, unicode):
             consumed = ''.join(consumed)
         return consumed, r[1]
-
-    def index_consumed_by(self, f):
-        """
-            Try to parse f, if successful return the start and end offset of
-            the full string matching it.
-        """
-        m = self.input
-        r = f()
-        return [m.position, self.input.position], r[1]
-
-    def range(self, c1, c2):
-        m = self.input
-        x, e = self.rule_anything()
-        if c1 <= x <= c2:
-            return x, e
-        else:
-            self.input = m
-            e[1] = expected('range between %r and %r' % (c1, c2))
-            raise _MaybeParseError(*e)
-
-    def _interleave(self, _locals, *args):
-        """
-        Call each of a list of functions in sequence until all succeed at least
-        ontime, rewinding the input between each.
-
-        @param fns: A list of no-argument callables.
-        """
-        args = list(args)
-        currInput = self.input
-        errors = []
-        ans = [None]*(len(args)/3)
-        for idx in range(0, len(args), 3):
-            mod, fun, name = args[idx:idx+3]
-            ans[idx/3] = [] if mod in ('*', '+') else None
-        while True:
-            idx = 0
-            all_done = True
-            for idx in range(0, len(args), 3):
-                mod, fun, name = args[idx:idx+3]
-                if args[idx] != '0':
-                    try:
-                        self.input = currInput
-                        v, e = fun()
-                        if args[idx] == '*':
-                            ans[idx/3].append(v)
-                        elif args[idx] == '+':
-                            ans[idx/3].append(v)
-                            args[idx] = '*'
-                        elif args[idx] in ('?','1'):
-                            ans[idx/3] = v
-                            args[idx] = '0'
-                        else:
-                            raise ValueError('invalid mode in OMeta._interleave')
-                        errors.append(e)
-                        currInput = self.input
-                        break
-                    except _MaybeParseError, e:
-                        self.input = currInput
-                        all_done = all_done and args[idx] in ('*', '?')
-            else:
-                if all_done:
-                    for idx in range(0, len(args), 3):
-                        mod, fun, name = args[idx:idx+3]
-                        if name:
-                            _locals[name] = ans[idx/3]
-                    return ans, joinErrors(errors)
-                else:
-                    raise _MaybeParseError(*joinErrors(errors))
 
     def pythonExpr(self, endChars="\r\n"):
         """

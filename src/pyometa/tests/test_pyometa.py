@@ -387,6 +387,17 @@ class OMetaTestCase(unittest.TestCase):
         """)
         self.assertEqual(g.broken('ab'), 'ab')
 
+    def test_consumedBy(self):
+        """
+        test consume-by operator
+        <letter (letter | digit)*>
+        instead of
+        letter:x (letter | digit)*:xs -> [String withAll: (xs addFirst: x; yourself)]
+        """
+        g = self.compile("""
+            username = <letter (letter | digit)*>
+            """)
+        self.assertEqual(g.username('a123'), 'a123')
 
 
 class PyExtractorTest(unittest.TestCase):

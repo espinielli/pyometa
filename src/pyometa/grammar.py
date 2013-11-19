@@ -17,7 +17,7 @@ class OMeta(OMetaBase):
         """
         Define a new subclass with the rules in the given grammar.
 
-        @param grammar: A string containing a PyOMeta grammar.
+        @param grammar: A string containing a PyOmeta grammar.
         @param globals: A dict of names that should be accessible by this
         grammar.
         @param name: The name of the class to be generated.
@@ -54,10 +54,6 @@ escapedChar = '\\' ('n' -> "\n"
 
 character = token("'") (escapedChar | ~('\'') anything)*:c token("'") -> self.builder.exactly(''.join(c))
 
-character2 = token("'") <(escapedChar | ~('\'') anything)*>:c token("'") -> c
-
-range = character2:c1 token("..") character2:c2 ?(c1 < c2) -> self.builder.range(c1, c2)
-
 string = token('"') (escapedChar | ~('"') anything)*:c token('"') -> self.builder.match_string(''.join(c))
 
 name = letter:x letterOrDigit*:xs !(xs.insert(0, x)) -> ''.join(xs)
@@ -72,13 +68,11 @@ expr1 = application
           |semanticPredicate
           |semanticAction
           |number
-          |range
           |character
           |string
           |token('(') expr:e token(')') -> e
           |token('[') expr:e token(']') -> self.builder.listpattern(e)
-          |token('<') expr:e token('>') -> self.builder.consumedby(e)
-          |token('@<') expr:e token('>') -> self.builder.index_consumedby(e)
+          |token('<') expr:e token('>') -> self.builder.consumed_by(e)
 
 expr2 = token('~') (token('~') expr2:e -> self.builder.lookahead(e)
                        |expr2:e -> self.builder._not(e))
@@ -93,28 +87,10 @@ expr3 = (expr2:e ('*' -> self.builder.many(e)
           |token(':') name:n
            -> self.builder.bind(self.builder.apply("anything", self.name), n)
 
-expr4 :ne = ?(ne) expr3+:es -> self.builder.sequence(es)
-          | ?(not ne) expr3*:es -> self.builder.sequence(es)
+expr4 = expr3*:es -> self.builder.sequence(es)
 
-expr5 :ne = interleavePart:e (token("&&") interleavePart)+:es !(es.insert(0, e))
-          -> self.builder.interleave(es)
-        | expr4(ne)
-
-interleavePart = token("(") expr4(True):e token(")") -> ["1", e]
- | expr4(True):part modedIPart(part):x -> x
-
-modedIPart = ['Many' :part]     -> ["*", part, None]
-           | ['Many1' :part]    -> ["+", part, None]
-           | ['Optional' :part] -> ["?", part, None]
-           | ['Bind' :name :part]:e modedIPart(part):newpart -> newpart[:2] + [name]
-           | ['And' :part] modedIPart(part):newpart -> newpart
-           | :part                      -> ["1", part, None]
-
-expr = expr5(True):e (token('|') expr5(True))+:es !(es.insert(0, e))
+expr = expr4:e (token('|') expr4)*:es !(es.insert(0, e))
           -> self.builder._or(es)
-      | expr5(True):e (token('||') expr5(True))+:es !(es.insert(0, e))
-          -> self.builder._xor(es)
-      | expr5(False)
 
 ruleValue = token("->") -> self.ruleValueExpr()
 
@@ -124,7 +100,7 @@ semanticAction = token("!(") -> self.semanticActionExpr()
 
 rulePart :requiredName = noindentation name:n ?(n == requiredName)
                             !(setattr(self, "name", n))
-                            expr5(False):args
+                            expr4:args
                             (token("=") expr:e
                                -> self.builder.sequence([args, e])
                             |  -> args)
@@ -159,10 +135,7 @@ opt = ( ['Apply' :ruleName :codeName [anything*:exprs]] -> self.builder.apply(ru
       | ['Action' :code]        -> self.builder.action(code)
       | ['Python' :code]        -> self.builder.expr(code)
       | ['List' opt:exprs]      -> self.builder.listpattern(exprs)
-      | ['ConsumedBy' opt:expr] -> self.builder.consumedby(expr)
-      | ['IndexConsumedBy' opt:expr] -> self.builder.index_consumedby(expr)
-      | ['Range' :c1 :c2]       -> self.builder.range(c1, c2)
-      | ['Interleave' opt:exprs] -> self.builder.interleave(exprs)
+      | ['ConsumedBy' opt:expr] -> self.builder.consumed_by(expr)
       )
 grammar = ['Grammar' :name [rulePair*:rs]] -> self.builder.makeGrammar(rs)
 rulePair = ['Rule' :name opt:rule] -> self.builder.rule(name, rule)

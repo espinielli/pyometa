@@ -35,19 +35,16 @@ class TreeBuilder(object):
         return ["Optional", expr]
 
     def _or(self, exprs):
-        return ["Or"] + exprs
+        return ["Or", exprs]
 
     def _not(self, expr):
         return ["Not", expr]
-
-    def _xor(self, exprs):
-        return ["Xor"] + exprs
 
     def lookahead(self, expr):
         return ["Lookahead", expr]
 
     def sequence(self, exprs):
-        return ["And"] + exprs
+        return ["And", exprs]
 
     def bind(self, expr, name):
         return ["Bind", name, expr]
@@ -64,17 +61,8 @@ class TreeBuilder(object):
     def listpattern(self, exprs):
         return ["List", exprs]
 
-    def consumedby(self, exprs):
+    def consumed_by(self, exprs):
         return ["ConsumedBy", exprs]
-
-    def index_consumedby(self, exprs):
-        return ["IndexConsumedBy", exprs]
-
-    def range(self, c1, c2):
-        return ["Range", c1, c2]
-
-    def interleave(self, exprs):
-        return ["Interleave"]+exprs
 
 class PythonWriter(object):
     """
@@ -177,6 +165,7 @@ class PythonWriter(object):
         """
         return self._expr('exactly', 'self.exactly(%r)' % (literal,))
 
+
     def generate_MatchString(self, literal):
         """
         Create a call to self.match_string(literal).
@@ -210,7 +199,7 @@ class PythonWriter(object):
         return self._expr('or', 'self._or([%s])' % (', '.join([realf, passf])))
 
 
-    def generate_Or(self, *exprs):
+    def generate_Or(self, exprs):
         """
         Create a call to
         self._or([lambda: expr1, lambda: expr2, ... , lambda: exprN]).
@@ -218,17 +207,6 @@ class PythonWriter(object):
         if len(exprs) > 1:
             fnames = [self._newThunkFor("or", expr) for expr in exprs]
             return self._expr('or', 'self._or([%s])' % (', '.join(fnames)))
-        else:
-            return self._generateNode(exprs[0])
-
-    def generate_Xor(self, *exprs):
-        """
-        Create a call to
-        self._xor([lambda: expr1, lambda: expr2, ... , lambda: exprN]).
-        """
-        if len(exprs) > 1:
-            fnames = [self._newThunkFor("xor", expr) for expr in exprs]
-            return self._expr('xor', 'self._xor([%s])' % (', '.join(fnames)))
         else:
             return self._generateNode(exprs[0])
 
@@ -248,7 +226,8 @@ class PythonWriter(object):
         fname = self._newThunkFor("lookahead", expr)
         return self._expr("lookahead", "self.lookahead(%s)" %(fname,))
 
-    def generate_And(self, *exprs):
+
+    def generate_And(self, exprs):
         """
         Generate code for each statement in order.
         """
@@ -320,31 +299,6 @@ class PythonWriter(object):
     def generate_ConsumedBy(self, expr):
         fname = self._newThunkFor("consumed_by", expr)
         return self._expr("consumed_by", "self.consumed_by(%s)" % (fname,))
-
-    def generate_IndexConsumedBy(self, expr):
-        fname = self._newThunkFor("index_consumed_by", expr)
-        return self._expr("index_consumed_by", "self.index_consumed_by(%s)" % (fname,))
-
-    def generate_Range(self, c1, c2):
-        """
-        Create a call to self.range(c1, c2)
-        """
-        return self._expr('range', 'self.range(%r, %r)' % (c1, c2))
-
-    def generate_Interleave(self, *exprs):
-        """
-        Create a call to
-        self._interleave([lambda: expr1, lambda: expr2, ... , lambda: exprN]).
-        """
-        if len(exprs) > 1:
-            args = []
-            for x, expr, name in exprs:
-                args.append(repr(x))
-                args.append(self._newThunkFor("interleave", expr))
-                args.append(repr(name))
-            return self._expr('interleave', 'self._interleave(_locals, %s)' % (', '.join(args)))
-        else:
-            return self._generateNode(exprs[0])
 
 class BootWriter(PythonWriter):
     def generate_Grammar(self, name, rules):
