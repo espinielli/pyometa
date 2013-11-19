@@ -64,6 +64,10 @@ class TreeBuilder(object):
     def consumed_by(self, exprs):
         return ["ConsumedBy", exprs]
 
+    def index_consumed_by(self, exprs):
+         return ["IndexConsumedBy", exprs]
+
+
 class PythonWriter(object):
     """
     Converts an OMeta syntax tree into Python source.
@@ -299,6 +303,12 @@ class PythonWriter(object):
     def generate_ConsumedBy(self, expr):
         fname = self._newThunkFor("consumed_by", expr)
         return self._expr("consumed_by", "self.consumed_by(%s)" % (fname,))
+
+    def generate_IndexConsumedBy(self, expr):
+        fname = self._newThunkFor("index_consumed_by", expr)
+        return self._expr("index_consumed_by", "self.index_consumed_by(%s)" % (fname,))
+
+
 
 class BootWriter(PythonWriter):
     def generate_Grammar(self, name, rules):

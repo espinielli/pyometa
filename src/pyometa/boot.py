@@ -465,9 +465,24 @@ class BootOMetaGrammar(GrammarBase):
             _G_python_6, lastError = eval('self.builder.consumed_by(e)', self.globals, _locals), None
             self.considerError(lastError)
             return (_G_python_6, self.currentError)
-        _G_or_11, lastError = self._or([_G_or_1, _G_or_2, _G_or_3, _G_or_4, _G_or_5, _G_or_6, _G_or_7, _G_or_8, _G_or_9, _G_or_10])
+        def _G_or_11():
+            _G_python_1, lastError = eval("'@<'", self.globals, _locals), None
+            self.considerError(lastError)
+            _G_apply_2, lastError = self._apply(self.rule_token, "token", [_G_python_1])
+            self.considerError(lastError)
+            _G_apply_3, lastError = self._apply(self.rule_expr, "expr", [])
+            self.considerError(lastError)
+            _locals['e'] = _G_apply_3
+            _G_python_4, lastError = eval("'>'", self.globals, _locals), None
+            self.considerError(lastError)
+            _G_apply_5, lastError = self._apply(self.rule_token, "token", [_G_python_4])
+            self.considerError(lastError)
+            _G_python_6, lastError = eval('self.builder.index_consumed_by(e)', self.globals, _locals), None
+            self.considerError(lastError)
+            return (_G_python_6, self.currentError)
+        _G_or_12, lastError = self._or([_G_or_1, _G_or_2, _G_or_3, _G_or_4, _G_or_5, _G_or_6, _G_or_7, _G_or_8, _G_or_9, _G_or_10, _G_or_11])
         self.considerError(lastError)
-        return (_G_or_11, self.currentError)
+        return (_G_or_12, self.currentError)
 
 
     def rule_expr2(self):

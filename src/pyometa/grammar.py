@@ -73,6 +73,7 @@ expr1 = application
           |token('(') expr:e token(')') -> e
           |token('[') expr:e token(']') -> self.builder.listpattern(e)
           |token('<') expr:e token('>') -> self.builder.consumed_by(e)
+          |token('@<') expr:e token('>') -> self.builder.index_consumed_by(e)
 
 expr2 = token('~') (token('~') expr2:e -> self.builder.lookahead(e)
                        |expr2:e -> self.builder._not(e))
@@ -136,6 +137,7 @@ opt = ( ['Apply' :ruleName :codeName [anything*:exprs]] -> self.builder.apply(ru
       | ['Python' :code]        -> self.builder.expr(code)
       | ['List' opt:exprs]      -> self.builder.listpattern(exprs)
       | ['ConsumedBy' opt:expr] -> self.builder.consumed_by(expr)
+      | ['IndexConsumedBy' opt:expr] -> self.builder.index_consumed_by(expr)
       )
 grammar = ['Grammar' :name [rulePair*:rs]] -> self.builder.makeGrammar(rs)
 rulePair = ['Rule' :name opt:rule] -> self.builder.rule(name, rule)

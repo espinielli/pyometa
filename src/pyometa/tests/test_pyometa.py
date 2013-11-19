@@ -399,6 +399,16 @@ class OMetaTestCase(unittest.TestCase):
             """)
         self.assertEqual(g.username('a123'), 'a123')
 
+    def test_indexConsumedBy(self):
+        """
+        test index-consumed-by operator
+        @<letter (letter | digit)*>
+        """
+        g = self.compile("""
+            usernamerange = @<letter (letter | digit)*>
+            """)
+        self.assertEqual(g.usernamerange('a123'), [0,4])
+
 
 class PyExtractorTest(unittest.TestCase):
     """
