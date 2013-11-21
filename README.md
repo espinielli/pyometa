@@ -142,28 +142,38 @@ to the basic OMeta grammar.
 The steps you would need to follow are:
 
 1. change `grammar.py` and add
+~~~~~{.python}
        | token('<') expr:e token('>') -> self.builder.consumed_by(e)
+~~~~~~ 
    to `expr1` definition
 
 2. add the `nullOptimizationGrammar` with the new node in `grammar.py`:
+~~~~~{.python}
        | ['ConsumedBy' opt:expr] -> self.builder.consumed_by(expr)
+~~~~~~ 
 
 3. add a new method to `TreeBuilder` class in `builder.py`:
+~~~~~{.python}
         def consumed_by(self, exprs):
             return ["ConsumedBy", exprs]
+~~~~~~ 
 
 4. add `generate_ConsumedBy` method in `PythonWriter` class in `builder.py`:
+~~~~~{.python}
         def generate_ConsumedBy(self, expr):
             fname = self._newThunkFor("consumed_by", expr)
             return self._expr("consumed_by", "self.consumed_by(%s)" % (fname,))
+~~~~~~ 
 
 5. generate a test for the new extension
 
 6. generate a boot grammar:
+~~~~~{.shell}
         $ export PYTHONPATH=$PWD/src:$PYTHONPATH
         $ mv src/pyomets/boot.py src/pyomets/boot.orig.py
         $ python src/pyometa/bootgenerator.py
         $ mv src/pyometa/boot_generated.py src/pyomets/boot.py
+~~~~~~ 
 
 7. run the tests and make sure that everything runs successfully
 
