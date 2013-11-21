@@ -137,8 +137,12 @@ stuff = (ones | twos)+
 
 
 ## References
+* [Parsing Expression Grammars][PEG]
+* [Alessandro Warth's Home Page][AWarth]
+* [OMeta2][ometa2]
+* Python, of course!][python]
 
-[^PEG]: http://bford.info/packrat/ "Parsing Expression Grammar"
-[^AWarth]: http://www.tinlizzie.org/~awarth/ "Alessandro Warth"
-[^ometa2]: http://www.tinlizzie.org/~awarth/ometa/ometa2.html "OMeta2"
-[^python]: http://www.python.org "Python Home Page"
+[PEG]: <http://bford.info/packrat/> "Parsing Expression Grammar"
+[AWarth]: <http://www.tinlizzie.org/~awarth/> "Alessandro Warth"
+[ometa2]: <http://www.tinlizzie.org/~awarth/ometa/ometa2.html> "OMeta2"
+[python]: <http://www.python.org> "Python Home Page"
