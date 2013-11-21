@@ -68,24 +68,24 @@ they succeed in matching.
 
 ### Summary Table (TODO: verify and complete)
 
-| "kind of thing"    | PyOMeta    | Note |
-|--------------------|------------|------|
-| boolean            | true       |      |
-| number             | 123        |      |
-| character          | 'x'        |      |
-| string             | "foo"      |      |
-| rule application   | expr       |      |
-|                    | r(x, y)    | 1    |
-|                    | ^digit     | 4    |
-| list               | ['x' 1]    |      |
-| grouping           | (foo bar)  |      |
-| negation           | ~'x'       |      |
-| look-ahead         | ~~'x'      |      |
-| semantic predicate | ?(x > y)   | 3    |
-| semantic action    | -> (x + y) | 3    |
-|                    | !(x + y)   | 3    |
-| binding            | expr:x     |      |
-|                    | :x         |      |
+| "kind of thing"    | PyOMeta      | Note |
+|--------------------|--------------|------|
+| boolean            | `true`       |      |
+| number             | `123`        |      |
+| character          | `'x'`        |      |
+| string             | `"foo"`      |      |
+| rule application   | `expr`       |      |
+|                    | `r(x, y)`    | 1    |
+|                    | `^digit`     | 4    |
+| list               | `['x' 1]`    |      |
+| grouping           | `(foo bar)`  |      |
+| negation           | `~'x'`       |      |
+| look-ahead         | `~~'x'`      |      |
+| semantic predicate | `?(x > y)`   | 3    |
+| semantic action    | `-> (x + y)` | 3    |
+|                    | `!(x + y)`   | 3    |
+| binding            | `expr:x`     |      |
+|                    | `:x`         |      |
 
 
 Note 1: the arguments do not necessarily have to be statement expressions -
