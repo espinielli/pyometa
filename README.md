@@ -140,7 +140,7 @@ stuff = (ones | twos)+
 * [Parsing Expression Grammars][PEG]
 * [Alessandro Warth's Home Page][AWarth]
 * [OMeta2][ometa2]
-* Python, of course!][python]
+* [Python, of course!][python]
 
 [PEG]: <http://bford.info/packrat/> "Parsing Expression Grammar"
 [AWarth]: <http://www.tinlizzie.org/~awarth/> "Alessandro Warth"
