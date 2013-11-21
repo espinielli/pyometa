@@ -39,7 +39,7 @@ they succeed in matching.
 `~expr`
 :   Fail if the next item in the input matches `expr`.
 
-`<ruleName>`
+`ruleName`
 :   Call the rule `ruleName`.
 
 `'x'`
@@ -48,10 +48,65 @@ they succeed in matching.
 `expr:name`
 :   Bind the result of `expr` to the local variable `name`.
 
-`=> pythonExpression`
+`-> pythonExpression`
 :   Evaluate the given Python expression and return its result.
 
-Comments are like Python comments, they start with `#` and extend to the end of the line.
+`!(pythonExpression)`
+:   Evaluate the given Python expression and return its result (this is used in the rule
+    definition part).
+
+`# this is a comment`
+:   Comments are like Python comments, they start with `#` and extend to the end of the line.
+
+`<expr>`
+:   _Consumed-by_ operator returns a sub-sequence of the input that contains the elements
+    matched by the enclosed expression `expr`
+
+`@<expr>`
+:    _Index-consumed-by_ operator returns an array with the start and end indices of the
+     elements consumed by the enclosed expression `expr`
+
+### Summary Table (TODO: verify and complete)
+
+| "kind of thing"    | PyOMeta    | Note |
+|--------------------|------------|------|
+| boolean            | true       |      |
+| number             | 123        |      |
+| character          | 'x'        |      |
+| string             | "foo"      |      |
+| rule application   | expr       |      |
+|                    | r(x, y)    | 1    |
+|                    | ^digit     | 4    |
+| list               | ['x' 1]    |      |
+| grouping           | (foo bar)  |      |
+| negation           | ~'x'       |      |
+| look-ahead         | ~~'x'      |      |
+| semantic predicate | ?(x > y)   | 3    |
+| semantic action    | -> (x + y) | 3    |
+|                    | !(x + y)   | 3    |
+| binding            | expr:x     |      |
+|                    | :x         |      |
+
+
+Note 1: the arguments do not necessarily have to be statement expressions -
+        they can be any Python expression.
+
+Note 2: not yet in the grammar, only via Python subclassing.
+
+Note 3: semantic predicates and actions are written in Python. More specifically,
+        they are either primary expressions, e.g.,
+            123
+            x
+            foo.bar()
+        or something called "statement expressions", which have the form
+            "{" <statement>* <expr> "}"
+        For example,
+            { x += 2; y = "foo"; f(x) }
+        The value of a statement expression is equal to that of its last expression.
+
+Note 4: "super" is just like any other rule (not a special form), so you have to
+        quote the rule name that you pass in as an argument, e.g., both `^r(1, 2)`
+        and `super("r", 1, 2)` are valid super-sends.
 
 
 ## Interface
@@ -67,11 +122,11 @@ rules and provide new ones. To invoke a grammar rule, call ``grammarObject.apply
 ## Example Usage
 
 ~~~~~{#usage .python}
->>> from pymeta.grammar import OMeta
+>>> from pyometa.grammar import OMeta
 >>> exampleGrammar = """
-ones ::= '1' '1' => 1
-twos ::= '2' '2' => 2
-stuff ::= (<ones> | <twos>)+
+ones = '1' '1' -> 1  # comment
+twos = '2' '2' -> 2
+stuff = (ones | twos)+
 """
 >>> Example = OMeta.makeGrammar(exampleGrammar, {})
 >>> g = Example("11221111")

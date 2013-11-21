@@ -408,6 +408,12 @@ class OMetaTestCase(unittest.TestCase):
             usernamerange = @<letter (letter | digit)*>
             """)
         self.assertEqual(g.usernamerange('a123'), [0,4])
+        g = self.compile("""
+            ones = '1' '1' -> 1  # comment
+            twos = '2' '2' -> 2
+            stuff = @<(ones | twos)*>
+            """)
+        self.assertEqual(g.stuff('11221111'), [0, 8])
 
 
 class PyExtractorTest(unittest.TestCase):
