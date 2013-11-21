@@ -3,7 +3,7 @@
 ## Summary
 
 PyOMeta is an implementation of [OMeta2][ometa2], an object-oriented pattern-matching language
-developed by [Alessandro Warth][AWarth] (http://www.cs.ucla.edu/~awarth/ometa/).
+developed by [Alessandro Warth][AWarth].
 PyOMeta provides a compact syntax based on [Parsing Expression Grammars][PEG] for common lexing,
 parsing and tree-transforming activities in a way that's easy to reason about for [Python][python]
 programmers.
@@ -136,6 +136,57 @@ stuff = (ones | twos)+
 ~~~~~~~~~~~~~
 
 
+## How to Extend OMeta grammar
+Say you want to add `consumed-by` operator (it is already in the grammar, by the way)
+to the basic OMeta grammar.
+The steps you would need to follow are:
+
+1. change `grammar.py` and add
+       | token('<') expr:e token('>') -> self.builder.consumed_by(e)
+   to `expr1` definition
+
+2. add the `nullOptimizationGrammar` with the new node in `grammar.py`:
+       | ['ConsumedBy' opt:expr] -> self.builder.consumed_by(expr)
+
+3. add a new method to `TreeBuilder` class in `builder.py`:
+        def consumed_by(self, exprs):
+            return ["ConsumedBy", exprs]
+
+4. add `generate_ConsumedBy` method in `PythonWriter` class in `builder.py`:
+        def generate_ConsumedBy(self, expr):
+            fname = self._newThunkFor("consumed_by", expr)
+            return self._expr("consumed_by", "self.consumed_by(%s)" % (fname,))
+
+5. generate a test for the new extension
+
+6. generate a boot grammar:
+        $ export PYTHONPATH=$PWD/src:$PYTHONPATH
+        $ mv src/pyomets/boot.py src/pyomets/boot.orig.py
+        $ python src/pyometa/bootgenerator.py
+        $ mv src/pyometa/boot_generated.py src/pyomets/boot.py
+
+7. run the tests and make sure that everything runs successfully
+
+
+## Acknowledgement of Sources
+This fork would not have been possible without the (real hard) work of [Allen Short][as]
+who first implemented a Python version of OMeta.
+The work of [Waldemar Kornewald][wk] has further pushed Allen's implementation towards
+OMeta2 syntax and behaviour.
+
+
+### Enrico's contributions
+I, [Enrico Spinielli][es], have
+* improved and updated README
+* included `consumed-by` and `index-consumed-by` from [Benjamin Dauvergne][bd]'s code
+* added tests `consumed-by` and `index-consumed-by`
+* added `Makefile`
+* document grammar extension
+
+## ToDo's
+* add more examples/tests
+* improve debugging/error reporting 
+
 ## References
 * [Parsing Expression Grammars][PEG]
 * [Alessandro Warth's Home Page][AWarth]
@@ -146,3 +197,7 @@ stuff = (ones | twos)+
 [AWarth]: <http://www.tinlizzie.org/~awarth/> "Alessandro Warth"
 [ometa2]: <http://www.tinlizzie.org/~awarth/ometa/ometa2.html> "OMeta2"
 [python]: <http://www.python.org> "Python Home Page"
+[wk]: <https://bitbucket.org/wkornewald/pymeta> "Waldemar Kornewald repo"
+[bd]: <https://bitbucket.org/bdauvergne/pymeta> "Benjamin Dauvergne repo"
+[as]: <https://launchpad.net/pymeta> "Allen Short PyMeta page"
+[es]: <https://plus.google.com/+EnricoSpinielli> "Enrico Spinielli G+"
